@@ -1,0 +1,32 @@
+{
+  "name": "marketplace-app",
+  "version": "1.0.0",
+  "description": "Full-stack multi-vendor e-commerce marketplace",
+  "type": "module",
+  "scripts": {
+    "install:backend": "cd backend && npm install",
+    "install:frontend": "cd frontend && npm install",
+    "install:all": "npm run install:backend && npm run install:frontend",
+    "build": "cd frontend && npm run build",
+    "start": "cd backend && npm start",
+    "dev:backend": "cd backend && npm run dev",
+    "dev:frontend": "cd frontend && npm run dev",
+    "dev": "concurrently --kill-others-on-fail \"npm run dev:backend\" \"npm run dev:frontend\"",
+    "start:both": "concurrently --kill-others-on-fail \"npm run dev:backend\" \"npm run dev:frontend\""
+  },
+  "keywords": [
+    "ecommerce",
+    "marketplace",
+    "multi-vendor",
+    "mern-stack"
+  ],
+  "author": "",
+  "license": "ISC",
+  "engines": {
+    "node": ">=18.0.0",
+    "npm": ">=9.0.0"
+  },
+  "devDependencies": {
+    "concurrently": "^8.2.2"
+  }
+}
