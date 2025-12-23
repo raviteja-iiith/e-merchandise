@@ -10,9 +10,14 @@ export const register = createAsyncThunk('auth/register', async (userData, { rej
     localStorage.setItem('refreshToken', response.data.data.refreshToken);
     toast.success(response.data.message);
     
-    // Fetch notifications immediately after registration
-    const { getNotifications } = await import('./notificationSlice');
-    dispatch(getNotifications());
+    // Fetch notifications immediately after registration (non-blocking)
+    import('./notificationSlice').then(({ getNotifications }) => {
+      dispatch(getNotifications()).catch(() => {
+        // Silently fail - notifications are not critical
+      });
+    }).catch(() => {
+      // Silently fail if notification module fails to load
+    });
     
     return response.data.data;
   } catch (error) {
@@ -42,9 +47,14 @@ export const login = createAsyncThunk('auth/login', async (credentials, { reject
     
     toast.success('Login successful');
     
-    // Fetch notifications immediately after login
-    const { getNotifications } = await import('./notificationSlice');
-    dispatch(getNotifications());
+    // Fetch notifications immediately after login (non-blocking)
+    import('./notificationSlice').then(({ getNotifications }) => {
+      dispatch(getNotifications()).catch(() => {
+        // Silently fail - notifications are not critical
+      });
+    }).catch(() => {
+      // Silently fail if notification module fails to load
+    });
     
     return response.data.data;
   } catch (error) {
