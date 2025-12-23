@@ -35,13 +35,11 @@ const Login = () => {
   };
 
   const handleGoogleLogin = () => {
-    const apiUrl = import.meta.env.VITE_API_URL || 'http://localhost:5000/api';
-    window.location.href = `${apiUrl.replace('/api', '')}/api/auth/google`;
+    window.location.href = `http://localhost:5000/api/auth/google`;
   };
 
   const handleGithubLogin = () => {
-    const apiUrl = import.meta.env.VITE_API_URL || 'http://localhost:5000/api';
-    window.location.href = `${apiUrl.replace('/api', '')}/api/auth/github`;
+    window.location.href = `http://localhost:5000/api/auth/github`;
   };
 
   return (
