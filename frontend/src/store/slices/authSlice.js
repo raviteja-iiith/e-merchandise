@@ -3,21 +3,12 @@ import api from '../../utils/api';
 import toast from 'react-hot-toast';
 
 // Async thunks
-export const register = createAsyncThunk('auth/register', async (userData, { rejectWithValue, dispatch }) => {
+export const register = createAsyncThunk('auth/register', async (userData, { rejectWithValue }) => {
   try {
     const response = await api.post('/auth/register', userData);
     localStorage.setItem('accessToken', response.data.data.accessToken);
     localStorage.setItem('refreshToken', response.data.data.refreshToken);
     toast.success(response.data.message);
-    
-    // Fetch notifications immediately after registration (non-blocking)
-    import('./notificationSlice').then(({ getNotifications }) => {
-      dispatch(getNotifications()).catch(() => {
-        // Silently fail - notifications are not critical
-      });
-    }).catch(() => {
-      // Silently fail if notification module fails to load
-    });
     
     return response.data.data;
   } catch (error) {
@@ -26,7 +17,7 @@ export const register = createAsyncThunk('auth/register', async (userData, { rej
   }
 });
 
-export const login = createAsyncThunk('auth/login', async (credentials, { rejectWithValue, dispatch }) => {
+export const login = createAsyncThunk('auth/login', async (credentials, { rejectWithValue }) => {
   try {
     const { email, password, rememberMe } = credentials;
     const response = await api.post('/auth/login', { email, password });
@@ -46,15 +37,6 @@ export const login = createAsyncThunk('auth/login', async (credentials, { reject
     }
     
     toast.success('Login successful');
-    
-    // Fetch notifications immediately after login (non-blocking)
-    import('./notificationSlice').then(({ getNotifications }) => {
-      dispatch(getNotifications()).catch(() => {
-        // Silently fail - notifications are not critical
-      });
-    }).catch(() => {
-      // Silently fail if notification module fails to load
-    });
     
     return response.data.data;
   } catch (error) {
