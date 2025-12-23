@@ -29,20 +29,23 @@ const Register = () => {
     }
 
     setLoading(true);
-    const { confirmPassword, ...dataToSend } = formData;
-    const result = await dispatch(register(dataToSend));
-    setLoading(false);
-    
-    if (result.type === 'auth/register/fulfilled') {
-      // Redirect based on user role
-      const userRole = result.payload?.user?.role;
-      if (userRole === 'vendor') {
-        navigate('/vendor');
-      } else if (userRole === 'admin') {
-        navigate('/admin');
-      } else {
-        navigate('/');
+    try {
+      const { confirmPassword, ...dataToSend } = formData;
+      const result = await dispatch(register(dataToSend));
+      
+      if (result.type === 'auth/register/fulfilled') {
+        // Redirect based on user role
+        const userRole = result.payload?.user?.role;
+        if (userRole === 'vendor') {
+          navigate('/vendor');
+        } else if (userRole === 'admin') {
+          navigate('/admin');
+        } else {
+          navigate('/');
+        }
       }
+    } finally {
+      setLoading(false);
     }
   };
 
