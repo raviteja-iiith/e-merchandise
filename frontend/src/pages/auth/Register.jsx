@@ -20,34 +20,39 @@ const Register = () => {
     setFormData({ ...formData, [e.target.name]: e.target.value });
   };
 
-  const handleSubmit = async (e) => {
-    e.preventDefault();
-    
-    if (formData.password !== formData.confirmPassword) {
-      alert('Passwords do not match');
-      return;
+const handleSubmit = async (e) => {
+  e.preventDefault();
+
+  if (formData.password !== formData.confirmPassword) {
+    alert('Passwords do not match');
+    return;
+  }
+
+  setLoading(true);
+  try {
+    const { confirmPassword, ...dataToSend } = formData;
+
+    // ✅ unwrap gives direct payload or throws error
+    const response = await dispatch(register(dataToSend)).unwrap();
+
+    const userRole = response?.user?.role;
+
+    if (userRole === 'vendor') {
+      navigate('/vendor');
+    } else if (userRole === 'admin') {
+      navigate('/admin');
+    } else {
+      navigate('/');
     }
 
-    setLoading(true);
-    try {
-      const { confirmPassword, ...dataToSend } = formData;
-      const result = await dispatch(register(dataToSend));
-      
-      if (result.type === 'auth/register/fulfilled') {
-        // Redirect based on user role
-        const userRole = result.payload?.user?.role;
-        if (userRole === 'vendor') {
-          navigate('/vendor');
-        } else if (userRole === 'admin') {
-          navigate('/admin');
-        } else {
-          navigate('/');
-        }
-      }
-    } finally {
-      setLoading(false);
-    }
-  };
+  } catch (error) {
+    console.error('Registration failed:', error);
+    alert(error?.message || 'Registration failed');
+  } finally {
+    setLoading(false);
+  }
+};
+
 
   return (
     <div className="min-h-screen flex items-center justify-center bg-gray-50 py-12 px-4">
