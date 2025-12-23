@@ -1,5 +1,5 @@
-import { useState, useEffect } from 'react';
-import { useDispatch, useSelector } from 'react-redux';
+import { useState } from 'react';
+import { useDispatch } from 'react-redux';
 import { Link, useNavigate } from 'react-router-dom';
 import { register } from '../../store/slices/authSlice';
 import { FiUser, FiMail, FiLock } from 'react-icons/fi';
@@ -7,9 +7,6 @@ import { FiUser, FiMail, FiLock } from 'react-icons/fi';
 const Register = () => {
   const dispatch = useDispatch();
   const navigate = useNavigate();
-
-  // ✅ auth state from redux
-  const { isAuthenticated, user } = useSelector((state) => state.auth);
 
   const [formData, setFormData] = useState({
     name: '',
@@ -20,19 +17,6 @@ const Register = () => {
   });
 
   const [loading, setLoading] = useState(false);
-
-  // ✅ REDIRECT ONLY AFTER AUTH STATE IS READY
-  useEffect(() => {
-    if (isAuthenticated && user) {
-      if (user.role === 'vendor') {
-        navigate('/vendor');
-      } else if (user.role === 'admin') {
-        navigate('/admin');
-      } else {
-        navigate('/');
-      }
-    }
-  }, [isAuthenticated, user, navigate]);
 
   const handleChange = (e) => {
     setFormData({ ...formData, [e.target.name]: e.target.value });
@@ -47,15 +31,27 @@ const Register = () => {
     }
 
     setLoading(true);
-    try {
-      const { confirmPassword, ...dataToSend } = formData;
-
-      // ❌ NO NAVIGATION HERE
-      await dispatch(register(dataToSend));
-    } catch (error) {
-      console.error('Registration failed:', error);
-    } finally {
-      setLoading(false);
+    const { confirmPassword, ...dataToSend } = formData;
+    
+    // ✅ Dispatch and wait for result (same pattern as Login)
+    const result = await dispatch(register(dataToSend));
+    setLoading(false);
+    
+    // ✅ Check if registration was successful and navigate
+    if (result.type === 'auth/register/fulfilled') {
+      // Redirect based on user role
+      const userRole = result.payload?.user?.role;
+      if (userRole === 'vendor') {
+        navigate('/vendor');
+      } else if (userRole === 'admin') {
+        navigate('/admin');
+      } else {
+        navigate('/');
+      }
+    } else {
+      // Handle error
+      const errorMessage = result.payload || 'Registration failed. Please try again.';
+      alert(errorMessage);
     }
   };
 
