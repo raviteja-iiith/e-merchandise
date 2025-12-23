@@ -1,5 +1,5 @@
-import { useState } from 'react';
-import { useDispatch } from 'react-redux';
+import { useState, useEffect } from 'react';
+import { useDispatch, useSelector } from 'react-redux';
 import { Link, useNavigate } from 'react-router-dom';
 import { register } from '../../store/slices/authSlice';
 import { FiUser, FiMail, FiLock } from 'react-icons/fi';
@@ -7,6 +7,10 @@ import { FiUser, FiMail, FiLock } from 'react-icons/fi';
 const Register = () => {
   const dispatch = useDispatch();
   const navigate = useNavigate();
+
+  // ✅ auth state from redux
+  const { isAuthenticated, user } = useSelector((state) => state.auth);
+
   const [formData, setFormData] = useState({
     name: '',
     email: '',
@@ -14,45 +18,46 @@ const Register = () => {
     confirmPassword: '',
     role: 'customer'
   });
+
   const [loading, setLoading] = useState(false);
+
+  // ✅ REDIRECT ONLY AFTER AUTH STATE IS READY
+  useEffect(() => {
+    if (isAuthenticated && user) {
+      if (user.role === 'vendor') {
+        navigate('/vendor');
+      } else if (user.role === 'admin') {
+        navigate('/admin');
+      } else {
+        navigate('/');
+      }
+    }
+  }, [isAuthenticated, user, navigate]);
 
   const handleChange = (e) => {
     setFormData({ ...formData, [e.target.name]: e.target.value });
   };
 
-const handleSubmit = async (e) => {
-  e.preventDefault();
+  const handleSubmit = async (e) => {
+    e.preventDefault();
 
-  if (formData.password !== formData.confirmPassword) {
-    alert('Passwords do not match');
-    return;
-  }
-
-  setLoading(true);
-  try {
-    const { confirmPassword, ...dataToSend } = formData;
-
-    // ✅ unwrap gives direct payload or throws error
-    const response = await dispatch(register(dataToSend)).unwrap();
-
-    const userRole = response?.user?.role;
-
-    if (userRole === 'vendor') {
-      navigate('/vendor');
-    } else if (userRole === 'admin') {
-      navigate('/admin');
-    } else {
-      navigate('/');
+    if (formData.password !== formData.confirmPassword) {
+      alert('Passwords do not match');
+      return;
     }
 
-  } catch (error) {
-    console.error('Registration failed:', error);
-    alert(error?.message || 'Registration failed');
-  } finally {
-    setLoading(false);
-  }
-};
+    setLoading(true);
+    try {
+      const { confirmPassword, ...dataToSend } = formData;
 
+      // ❌ NO NAVIGATION HERE
+      await dispatch(register(dataToSend));
+    } catch (error) {
+      console.error('Registration failed:', error);
+    } finally {
+      setLoading(false);
+    }
+  };
 
   return (
     <div className="min-h-screen flex items-center justify-center bg-gray-50 py-12 px-4">
@@ -65,7 +70,9 @@ const handleSubmit = async (e) => {
         <div className="card">
           <form onSubmit={handleSubmit} className="space-y-6">
             <div>
-              <label className="block text-sm font-medium text-gray-700 mb-2">Full Name</label>
+              <label className="block text-sm font-medium text-gray-700 mb-2">
+                Full Name
+              </label>
               <div className="relative">
                 <FiUser className="absolute left-3 top-1/2 transform -translate-y-1/2 text-gray-400" />
                 <input
@@ -81,7 +88,9 @@ const handleSubmit = async (e) => {
             </div>
 
             <div>
-              <label className="block text-sm font-medium text-gray-700 mb-2">Email</label>
+              <label className="block text-sm font-medium text-gray-700 mb-2">
+                Email
+              </label>
               <div className="relative">
                 <FiMail className="absolute left-3 top-1/2 transform -translate-y-1/2 text-gray-400" />
                 <input
@@ -97,7 +106,9 @@ const handleSubmit = async (e) => {
             </div>
 
             <div>
-              <label className="block text-sm font-medium text-gray-700 mb-2">Password</label>
+              <label className="block text-sm font-medium text-gray-700 mb-2">
+                Password
+              </label>
               <div className="relative">
                 <FiLock className="absolute left-3 top-1/2 transform -translate-y-1/2 text-gray-400" />
                 <input
@@ -113,7 +124,9 @@ const handleSubmit = async (e) => {
             </div>
 
             <div>
-              <label className="block text-sm font-medium text-gray-700 mb-2">Confirm Password</label>
+              <label className="block text-sm font-medium text-gray-700 mb-2">
+                Confirm Password
+              </label>
               <div className="relative">
                 <FiLock className="absolute left-3 top-1/2 transform -translate-y-1/2 text-gray-400" />
                 <input
@@ -129,7 +142,9 @@ const handleSubmit = async (e) => {
             </div>
 
             <div>
-              <label className="block text-sm font-medium text-gray-700 mb-2">I want to</label>
+              <label className="block text-sm font-medium text-gray-700 mb-2">
+                I want to
+              </label>
               <select
                 name="role"
                 value={formData.role}
@@ -152,7 +167,10 @@ const handleSubmit = async (e) => {
 
           <p className="mt-6 text-center text-sm text-gray-600">
             Already have an account?{' '}
-            <Link to="/login" className="text-primary-600 hover:text-primary-700 font-medium">
+            <Link
+              to="/login"
+              className="text-primary-600 hover:text-primary-700 font-medium"
+            >
               Sign in
             </Link>
           </p>

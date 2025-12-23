@@ -1,183 +1,143 @@
-import { useState, useEffect } from 'react';
+import { useEffect } from 'react';
+import { Routes, Route, Navigate } from 'react-router-dom';
 import { useDispatch, useSelector } from 'react-redux';
-import { Link, useNavigate } from 'react-router-dom';
-import { register } from '../../store/slices/authSlice';
-import { FiUser, FiMail, FiLock } from 'react-icons/fi';
+import { getMe } from './store/slices/authSlice';
+import { getNotifications } from './store/slices/notificationSlice';
 
-const Register = () => {
-  const dispatch = useDispatch();
-  const navigate = useNavigate();
+// Layouts
+import MainLayout from './layouts/MainLayout';
+import DashboardLayout from './layouts/DashboardLayout';
 
-  // ✅ auth state from redux
+// Pages
+import Home from './pages/Home';
+import Login from './pages/auth/Login';
+import Register from './pages/auth/Register';
+import OAuthCallback from './pages/auth/OAuthCallback';
+import Products from './pages/Products';
+import ProductDetail from './pages/ProductDetail';
+import Cart from './pages/Cart';
+import Checkout from './pages/Checkout';
+import Orders from './pages/Orders';
+import OrderDetail from './pages/OrderDetail';
+import Profile from './pages/Profile';
+import Wishlist from './pages/Wishlist';
+import Notifications from './pages/Notifications';
+  
+// Vendor Pages
+import VendorDashboard from './pages/vendor/Dashboard';
+import VendorProducts from './pages/vendor/Products';
+import VendorProductForm from './pages/vendor/ProductForm';
+import VendorOrders from './pages/vendor/Orders';
+import VendorOrderDetail from './pages/vendor/OrderDetail';
+import VendorAnalytics from './pages/vendor/Analytics';
+import VendorProfile from './pages/vendor/Profile';
+
+// Admin Pages
+import AdminDashboard from './pages/admin/Dashboard';
+import AdminVendors from './pages/admin/Vendors';
+import AdminOrders from './pages/admin/Orders';
+import AdminProducts from './pages/admin/Products';
+import AdminUsers from './pages/admin/Users';
+import AdminCategories from './pages/admin/Categories';
+import AdminCoupons from './pages/admin/Coupons';
+import AdminReviews from './pages/admin/Reviews';
+import AdminSettings from './pages/admin/Settings';
+
+// Protected Route Component
+const ProtectedRoute = ({ children, roles = [] }) => {
   const { isAuthenticated, user } = useSelector((state) => state.auth);
 
-  const [formData, setFormData] = useState({
-    name: '',
-    email: '',
-    password: '',
-    confirmPassword: '',
-    role: 'customer'
-  });
+  if (!isAuthenticated) {
+    return <Navigate to="/login" replace />;
+  }
 
-  const [loading, setLoading] = useState(false);
+  if (roles.length > 0 && !roles.includes(user?.role)) {
+    return <Navigate to="/" replace />;
+  }
 
-  // ✅ REDIRECT ONLY AFTER AUTH STATE IS READY
-  useEffect(() => {
-    if (isAuthenticated && user) {
-      if (user.role === 'vendor') {
-        navigate('/vendor');
-      } else if (user.role === 'admin') {
-        navigate('/admin');
-      } else {
-        navigate('/');
-      }
-    }
-  }, [isAuthenticated, user, navigate]);
-
-  const handleChange = (e) => {
-    setFormData({ ...formData, [e.target.name]: e.target.value });
-  };
-
-  const handleSubmit = async (e) => {
-    e.preventDefault();
-
-    if (formData.password !== formData.confirmPassword) {
-      alert('Passwords do not match');
-      return;
-    }
-
-    setLoading(true);
-    try {
-      const { confirmPassword, ...dataToSend } = formData;
-
-      // ❌ NO NAVIGATION HERE
-      await dispatch(register(dataToSend));
-    } catch (error) {
-      console.error('Registration failed:', error);
-    } finally {
-      setLoading(false);
-    }
-  };
-
-  return (
-    <div className="min-h-screen flex items-center justify-center bg-gray-50 py-12 px-4">
-      <div className="max-w-md w-full">
-        <div className="text-center mb-8">
-          <h2 className="text-3xl font-bold text-gray-900">Create Account</h2>
-          <p className="mt-2 text-gray-600">Join our marketplace today</p>
-        </div>
-
-        <div className="card">
-          <form onSubmit={handleSubmit} className="space-y-6">
-            <div>
-              <label className="block text-sm font-medium text-gray-700 mb-2">
-                Full Name
-              </label>
-              <div className="relative">
-                <FiUser className="absolute left-3 top-1/2 transform -translate-y-1/2 text-gray-400" />
-                <input
-                  type="text"
-                  name="name"
-                  value={formData.name}
-                  onChange={handleChange}
-                  className="input-field pl-10"
-                  placeholder="John Doe"
-                  required
-                />
-              </div>
-            </div>
-
-            <div>
-              <label className="block text-sm font-medium text-gray-700 mb-2">
-                Email
-              </label>
-              <div className="relative">
-                <FiMail className="absolute left-3 top-1/2 transform -translate-y-1/2 text-gray-400" />
-                <input
-                  type="email"
-                  name="email"
-                  value={formData.email}
-                  onChange={handleChange}
-                  className="input-field pl-10"
-                  placeholder="you@example.com"
-                  required
-                />
-              </div>
-            </div>
-
-            <div>
-              <label className="block text-sm font-medium text-gray-700 mb-2">
-                Password
-              </label>
-              <div className="relative">
-                <FiLock className="absolute left-3 top-1/2 transform -translate-y-1/2 text-gray-400" />
-                <input
-                  type="password"
-                  name="password"
-                  value={formData.password}
-                  onChange={handleChange}
-                  className="input-field pl-10"
-                  placeholder="••••••••"
-                  required
-                />
-              </div>
-            </div>
-
-            <div>
-              <label className="block text-sm font-medium text-gray-700 mb-2">
-                Confirm Password
-              </label>
-              <div className="relative">
-                <FiLock className="absolute left-3 top-1/2 transform -translate-y-1/2 text-gray-400" />
-                <input
-                  type="password"
-                  name="confirmPassword"
-                  value={formData.confirmPassword}
-                  onChange={handleChange}
-                  className="input-field pl-10"
-                  placeholder="••••••••"
-                  required
-                />
-              </div>
-            </div>
-
-            <div>
-              <label className="block text-sm font-medium text-gray-700 mb-2">
-                I want to
-              </label>
-              <select
-                name="role"
-                value={formData.role}
-                onChange={handleChange}
-                className="input-field"
-              >
-                <option value="customer">Shop as Customer</option>
-                <option value="vendor">Sell as Vendor</option>
-              </select>
-            </div>
-
-            <button
-              type="submit"
-              disabled={loading}
-              className="w-full btn-primary"
-            >
-              {loading ? 'Creating account...' : 'Create Account'}
-            </button>
-          </form>
-
-          <p className="mt-6 text-center text-sm text-gray-600">
-            Already have an account?{' '}
-            <Link
-              to="/login"
-              className="text-primary-600 hover:text-primary-700 font-medium"
-            >
-              Sign in
-            </Link>
-          </p>
-        </div>
-      </div>
-    </div>
-  );
+  return children;
 };
 
-export default Register;
+function App() {
+  const dispatch = useDispatch();
+  const { accessToken, isAuthenticated } = useSelector((state) => state.auth);
+
+  useEffect(() => {
+    if (accessToken) {
+      dispatch(getMe());
+    }
+  }, [dispatch, accessToken]);
+
+  // Fetch notifications when user is authenticated
+  useEffect(() => {
+    if (isAuthenticated) {
+      dispatch(getNotifications());
+      // Refresh notifications every 30 seconds
+      const interval = setInterval(() => {
+        dispatch(getNotifications());
+      }, 30000);
+      return () => clearInterval(interval);
+    }
+  }, [dispatch, isAuthenticated]);
+
+  return (
+    <Routes>
+      {/* Public Routes */}
+      <Route path="/" element={<MainLayout />}>
+        <Route index element={<Home />} />
+        <Route path="login" element={<Login />} />
+        <Route path="register" element={<Register />} />
+        <Route path="auth/callback" element={<OAuthCallback />} />
+        <Route path="products" element={<Products />} />
+        <Route path="products/:id" element={<ProductDetail />} />
+        
+        {/* Protected Customer Routes */}
+        <Route path="cart" element={<ProtectedRoute><Cart /></ProtectedRoute>} />
+        <Route path="checkout" element={<ProtectedRoute><Checkout /></ProtectedRoute>} />
+        <Route path="orders" element={<ProtectedRoute><Orders /></ProtectedRoute>} />
+        <Route path="orders/:orderId" element={<ProtectedRoute><OrderDetail /></ProtectedRoute>} />
+        <Route path="profile" element={<ProtectedRoute><Profile /></ProtectedRoute>} />
+        <Route path="wishlist" element={<ProtectedRoute><Wishlist /></ProtectedRoute>} />
+        <Route path="notifications" element={<ProtectedRoute><Notifications /></ProtectedRoute>} />
+      </Route>
+
+      {/* Vendor Routes */}
+      <Route path="/vendor" element={
+        <ProtectedRoute roles={['vendor']}>
+          <DashboardLayout userType="vendor" />
+        </ProtectedRoute>
+      }>
+        <Route index element={<VendorDashboard />} />
+        <Route path="products" element={<VendorProducts />} />
+        <Route path="products/new" element={<VendorProductForm />} />
+        <Route path="products/:productId/edit" element={<VendorProductForm />} />
+        <Route path="orders" element={<VendorOrders />} />
+        <Route path="orders/:orderId" element={<VendorOrderDetail />} />
+        <Route path="analytics" element={<VendorAnalytics />} />
+        <Route path="profile" element={<VendorProfile />} />
+      </Route>
+
+      {/* Admin Routes */}
+      <Route path="/admin" element={
+        <ProtectedRoute roles={['admin']}>
+          <DashboardLayout userType="admin" />
+        </ProtectedRoute>
+      }>
+        <Route index element={<AdminDashboard />} />
+        <Route path="vendors" element={<AdminVendors />} />
+        <Route path="orders" element={<AdminOrders />} />
+        <Route path="products" element={<AdminProducts />} />
+        <Route path="users" element={<AdminUsers />} />
+        <Route path="categories" element={<AdminCategories />} />
+        <Route path="coupons" element={<AdminCoupons />} />
+        <Route path="reviews" element={<AdminReviews />} />
+        <Route path="settings" element={<AdminSettings />} />
+      </Route>
+
+      {/* 404 */}
+      <Route path="*" element={<div className="flex items-center justify-center h-screen"><h1 className="text-4xl">404 - Page Not Found</h1></div>} />
+    </Routes>
+  );
+}
+
+export default App;
