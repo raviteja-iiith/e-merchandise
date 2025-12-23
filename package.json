@@ -4,17 +4,16 @@
   "description": "Full-stack multi-vendor e-commerce marketplace",
   "type": "module",
   "scripts": {
-    "install:backend": "cd backend && npm install",
-    "install:frontend": "cd frontend && npm install",
-    "install:all": "npm run install:backend && npm run install:frontend",
-    "build": "cd frontend && npm install --include=dev && npm run build",
-    "build:backend": "cd backend && npm install",
-    "start": "cd backend && npm start",
-    "dev:backend": "cd backend && npm run dev",
-    "dev:frontend": "cd frontend && npm run dev",
-    "dev": "concurrently --kill-others-on-fail \"npm run dev:backend\" \"npm run dev:frontend\"",
-    "start:both": "concurrently --kill-others-on-fail \"npm run dev:backend\" \"npm run dev:frontend\""
-  },
+  "install:backend": "cd backend && npm install",
+  "install:frontend": "cd frontend && npm install",
+  "install:all": "npm run install:backend && npm run install:frontend",
+  "build": "npm run install:backend && cd frontend && npm install --include=dev && npm run build",
+  "start": "cd backend && npm start",
+  "dev:backend": "cd backend && npm run dev",
+  "dev:frontend": "cd frontend && npm run dev",
+  "dev": "concurrently --kill-others-on-fail \"npm run dev:backend\" \"npm run dev:frontend\""
+}
+,
   "keywords": [
     "ecommerce",
     "marketplace",
