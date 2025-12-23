@@ -38,7 +38,32 @@ initializeSocketIO(io);
 app.set('io', io);
 
 // Security middleware
-app.use(helmet());
+app.use(
+  helmet({
+    contentSecurityPolicy: {
+      directives: {
+        defaultSrc: ["'self'"],
+        scriptSrc: [
+          "'self'",
+          "https://js.stripe.com",
+          "https://accounts.google.com"
+        ],
+        connectSrc: [
+          "'self'",
+          "https://api.stripe.com",
+          process.env.FRONTEND_URL,
+          process.env.BACKEND_URL || "*"
+        ],
+        frameSrc: [
+          "'self'",
+          "https://js.stripe.com",
+          "https://accounts.google.com"
+        ],
+        imgSrc: ["'self'", "data:", "https:"],
+      },
+    },
+  })
+);
 app.use(cors({
   origin: ['http://localhost:5173', 'http://localhost:5174', process.env.FRONTEND_URL].filter(Boolean),
   credentials: true
