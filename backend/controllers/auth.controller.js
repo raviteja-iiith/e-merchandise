@@ -43,7 +43,7 @@ export const register = asyncHandler(async (req, res, next) => {
 
   // Send verification email
   try {
-    await sendEmail({
+     sendEmail({
       to: user.email,
       subject: 'Email Verification - Marketplace',
       html: emailTemplates.verifyEmail(user.name, verificationToken, process.env.FRONTEND_URL)
