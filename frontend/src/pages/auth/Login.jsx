@@ -7,7 +7,12 @@ import { FiMail, FiLock } from 'react-icons/fi';
 const Login = () => {
   const dispatch = useDispatch();
   const navigate = useNavigate();
-  const [formData, setFormData] = useState({ email: '', password: '' });
+
+  const [formData, setFormData] = useState({
+    email: '',
+    password: '',
+  });
+
   const [rememberMe, setRememberMe] = useState(false);
   const [loading, setLoading] = useState(false);
 
@@ -18,28 +23,31 @@ const Login = () => {
   const handleSubmit = async (e) => {
     e.preventDefault();
     setLoading(true);
-    const result = await dispatch(login({ ...formData, rememberMe }));
-    setLoading(false);
-    
-    if (result.type === 'auth/login/fulfilled') {
-      // Redirect based on user role
-      const userRole = result.payload?.user?.role;
-      if (userRole === 'vendor') {
-        navigate('/vendor');
-      } else if (userRole === 'admin') {
-        navigate('/admin');
-      } else {
-        navigate('/');
-      }
+
+    try {
+      const data = await dispatch(
+        login({ ...formData, rememberMe })
+      ).unwrap();
+
+      const role = data.user.role;
+
+      if (role === 'vendor') navigate('/vendor');
+      else if (role === 'admin') navigate('/admin');
+      else navigate('/');
+    } catch (err) {
+      alert(err || 'Login failed');
+    } finally {
+      setLoading(false);
     }
   };
 
+  // ✅ OAUTH — USE DEPLOYED BACKEND
   const handleGoogleLogin = () => {
-    window.location.href = `http://localhost:5000/api/auth/google`;
+    window.location.href = `${import.meta.env.VITE_API_URL}/api/auth/google`;
   };
 
   const handleGithubLogin = () => {
-    window.location.href = `http://localhost:5000/api/auth/github`;
+    window.location.href = `${import.meta.env.VITE_API_URL}/api/auth/github`;
   };
 
   return (
@@ -53,9 +61,11 @@ const Login = () => {
         <div className="card">
           <form onSubmit={handleSubmit} className="space-y-6">
             <div>
-              <label className="block text-sm font-medium text-gray-700 mb-2">Email</label>
+              <label className="block text-sm font-medium text-gray-700 mb-2">
+                Email
+              </label>
               <div className="relative">
-                <FiMail className="absolute left-3 top-1/2 transform -translate-y-1/2 text-gray-400" />
+                <FiMail className="absolute left-3 top-1/2 -translate-y-1/2 text-gray-400" />
                 <input
                   type="email"
                   name="email"
@@ -69,9 +79,11 @@ const Login = () => {
             </div>
 
             <div>
-              <label className="block text-sm font-medium text-gray-700 mb-2">Password</label>
+              <label className="block text-sm font-medium text-gray-700 mb-2">
+                Password
+              </label>
               <div className="relative">
-                <FiLock className="absolute left-3 top-1/2 transform -translate-y-1/2 text-gray-400" />
+                <FiLock className="absolute left-3 top-1/2 -translate-y-1/2 text-gray-400" />
                 <input
                   type="password"
                   name="password"
@@ -86,15 +98,19 @@ const Login = () => {
 
             <div className="flex items-center justify-between">
               <label className="flex items-center">
-                <input 
-                  type="checkbox" 
+                <input
+                  type="checkbox"
                   checked={rememberMe}
                   onChange={(e) => setRememberMe(e.target.checked)}
-                  className="mr-2" 
+                  className="mr-2"
                 />
                 <span className="text-sm text-gray-600">Remember me</span>
               </label>
-              <Link to="/forgot-password" className="text-sm text-primary-600 hover:text-primary-700">
+
+              <Link
+                to="/forgot-password"
+                className="text-sm text-primary-600 hover:text-primary-700"
+              >
                 Forgot password?
               </Link>
             </div>
@@ -114,15 +130,26 @@ const Login = () => {
                 <div className="w-full border-t border-gray-300"></div>
               </div>
               <div className="relative flex justify-center text-sm">
-                <span className="px-2 bg-white text-gray-500">Or continue with</span>
+                <span className="px-2 bg-white text-gray-500">
+                  Or continue with
+                </span>
               </div>
             </div>
 
             <div className="mt-6 grid grid-cols-2 gap-3">
-              <button type="button" onClick={handleGoogleLogin} className="btn-outline">
+              <button
+                type="button"
+                onClick={handleGoogleLogin}
+                className="btn-outline"
+              >
                 Google
               </button>
-              <button type="button" onClick={handleGithubLogin} className="btn-outline">
+
+              <button
+                type="button"
+                onClick={handleGithubLogin}
+                className="btn-outline"
+              >
                 GitHub
               </button>
             </div>
@@ -130,7 +157,10 @@ const Login = () => {
 
           <p className="mt-6 text-center text-sm text-gray-600">
             Don't have an account?{' '}
-            <Link to="/register" className="text-primary-600 hover:text-primary-700 font-medium">
+            <Link
+              to="/register"
+              className="text-primary-600 hover:text-primary-700 font-medium"
+            >
               Sign up
             </Link>
           </p>
