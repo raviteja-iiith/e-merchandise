@@ -1,33 +1,33 @@
 import nodemailer from 'nodemailer';
 
 const transporter = nodemailer.createTransport({
-  service: process.env.EMAIL_SERVICE,
-  host: process.env.EMAIL_HOST,
-  port: process.env.EMAIL_PORT,
-  secure: false,
+  service: 'gmail',
   auth: {
     user: process.env.EMAIL_USER,
-    pass: process.env.EMAIL_PASSWORD
+    pass: process.env.EMAIL_PASSWORD, // Gmail App Password
+  },
+});
+
+transporter.verify((error) => {
+  if (error) {
+    console.error('SMTP ERROR:', error);
+  } else {
+    console.log('SMTP READY');
   }
 });
 
-export const sendEmail = async (options) => {
+export const sendEmail = async ({ to, subject, html, text }) => {
   const mailOptions = {
-    from: `${process.env.EMAIL_FROM} <${process.env.EMAIL_USER}>`,
-    to: options.to,
-    subject: options.subject,
-    html: options.html,
-    text: options.text
+    from: `Marketplace <${process.env.EMAIL_USER}>`,
+    to,
+    subject,
+    html,
+    text,
   };
 
-  try {
-    await transporter.sendMail(mailOptions);
-    console.log(`Email sent to ${options.to}`);
-  } catch (error) {
-    console.error('Email sending failed:', error);
-    throw new Error('Email could not be sent');
-  }
+  await transporter.sendMail(mailOptions);
 };
+
 
 // Email templates
 export const emailTemplates = {
